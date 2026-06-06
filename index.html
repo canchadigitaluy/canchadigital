@@ -143,6 +143,18 @@
     .mobile-menu a { color: var(--text); text-decoration: none; font-size: 1rem; font-weight: 300; padding: 14px 0; border-bottom: 1px solid var(--rule); letter-spacing: 0.01em; }
     .mobile-menu a:last-child { border-bottom: none; color: var(--green); }
     @media (max-width: 820px) { .nav-links { display: none; } .nav-hamburger { display: flex; } }
+    @media (max-width: 600px) {
+      section { padding: 80px 5%; }
+      .hero-headline { font-size: clamp(3rem, 12vw, 4.5rem); }
+      .hero-sub { font-size: 0.95rem; }
+      .hero-ctas { flex-direction: column; align-items: flex-start; gap: 14px; }
+      .hero-meta { gap: 20px; }
+      .hero-stat-num { font-size: 1.8rem; }
+      .contacto-data { gap: 20px; }
+      .cd-div { display: none; }
+      .contacto-headline { font-size: clamp(2.4rem, 10vw, 4rem); }
+      footer { flex-direction: column; align-items: flex-start; gap: 10px; }
+    }
 
     /* ─── HERO ─── */
     #hero {
@@ -641,6 +653,7 @@
       </div>
     </div>
     <p style="margin-top:16px;font-size:0.76rem;color:var(--muted);text-align:center">Sin contratos · Sin permanencia mínima · Cancelás cuando querés</p>
+    <p style="margin-top:10px;font-size:0.72rem;color:var(--green);opacity:0.75;text-align:center;letter-spacing:0.04em">Precio exclusivo para clubes de la Liga Universitaria</p>
   </div>
 </section>
 
@@ -738,26 +751,6 @@
 
 <hr class="rule" />
 
-<!-- ─── SEGUINOS ─── -->
-<section id="seguinos">
-  <div class="wrap">
-    <div class="seguinos-inner">
-      <div class="seguinos-left fade">
-        <div class="ig-orb">
-          <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-        </div>
-        <div>
-          <div class="seguinos-handle">@canchadigitaluy</div>
-          <div class="seguinos-desc">Los nuevos sitios, las actualizaciones y todo lo que pasa en la liga</div>
-        </div>
-      </div>
-      <a href="https://instagram.com/canchadigitaluy" target="_blank" class="btn btn-line fade d1">Ir a Instagram →</a>
-    </div>
-  </div>
-</section>
-
-<hr class="rule" />
-
 <!-- ─── CTA FINAL ─── -->
 <section id="contacto">
   <div class="contacto-glow"></div>
@@ -777,18 +770,20 @@
         <div class="cd-item">
           <a href="https://instagram.com/canchadigitaluy" target="_blank" style="text-decoration:none;color:inherit">
             <div class="cd-val">@canchadigitaluy</div>
-            <div class="cd-key">Instagram</div>
+            <div class="cd-key">Instagram · DM para empezar</div>
           </a>
-        </div>
-        <div class="cd-div"></div>
-        <div class="cd-item">
-          <div class="cd-val">canchadigital.uy</div>
-          <div class="cd-key">Sitio web</div>
         </div>
         <div class="cd-div"></div>
         <div class="cd-item">
           <div class="cd-val">&lt; 7 días</div>
           <div class="cd-key">Tu sitio activo</div>
+        </div>
+        <div class="cd-div"></div>
+        <div class="cd-item">
+          <a href="https://instagram.com/canchadigitaluy" target="_blank" style="text-decoration:none;color:inherit">
+            <div class="cd-val">Seguinos</div>
+            <div class="cd-key">Nuevos sitios y novedades</div>
+          </a>
         </div>
       </div>
     </div>
@@ -801,7 +796,7 @@
   <p class="fcopy">© 2025 Cancha Digital · Uruguay</p>
   <div class="flinks">
     <a href="https://instagram.com/canchadigitaluy" target="_blank">Instagram</a>
-    <a href="mailto:canchadigital.uy@gmail.com">Contacto</a>
+    <a href="https://ig.me/m/canchadigitaluy" target="_blank">Contacto</a>
   </div>
 </footer>
 
