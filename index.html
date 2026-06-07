@@ -395,9 +395,65 @@
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: 2px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--green-line); }
+
+    /* ─── INTRO OVERLAY ─── */
+    #intro {
+      position: fixed; inset: 0; z-index: 2000;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 44px;
+      will-change: transform;
+      transition: transform 0.95s cubic-bezier(0.76, 0, 0.24, 1);
+    }
+    #intro.gone { transform: translateY(-100%); }
+
+    .intro-eyebrow {
+      font-size: 0.6rem; font-weight: 500;
+      letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0;
+      animation: iIn 0.55s ease 0.2s forwards;
+    }
+    .intro-wordmark {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(1.5rem, 6.5vw, 3rem);
+      font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--text); line-height: 1;
+      opacity: 0;
+      animation: iIn 0.6s ease 0.38s forwards;
+    }
+    .intro-wordmark b { color: var(--green); font-weight: 500; }
+    .intro-track {
+      width: min(200px, 52vw); height: 1px;
+      background: rgba(255,255,255,0.06); position: relative;
+    }
+    .intro-track::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: var(--green); opacity: 0.85;
+      transform-origin: left; transform: scaleX(0);
+      animation: iTrack 1.15s cubic-bezier(0.4, 0, 0.2, 1) 0.55s forwards;
+    }
+
+    @keyframes iIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes iTrack {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
+    }
   </style>
 </head>
 <body>
+
+<!-- ─── INTRO ─── -->
+<div id="intro" role="presentation" aria-hidden="true">
+  <p class="intro-eyebrow">Liga Universitaria · Uruguay</p>
+  <div class="intro-wordmark">Cancha<b>Digital</b></div>
+  <div class="intro-track"></div>
+</div>
 
 <div class="progress" id="prog"></div>
 
@@ -801,6 +857,22 @@
 </footer>
 
 <script>
+  // ─── Intro overlay ───
+  (function () {
+    document.documentElement.style.overflow = 'hidden';
+    function launchIntro() {
+      setTimeout(function () {
+        var el = document.getElementById('intro');
+        if (!el) return;
+        el.classList.add('gone');
+        document.documentElement.style.overflow = '';
+        el.addEventListener('transitionend', function () { el.remove(); }, { once: true });
+      }, 2050); // eyebrow(0.2+0.55) + wordmark(0.38+0.6) + track(0.55+1.15) + pause ≈ 2.05s
+    }
+    if (document.readyState === 'complete') { launchIntro(); }
+    else { window.addEventListener('load', launchIntro); }
+  })();
+
   // Scroll progress
   const prog = document.getElementById('prog');
   function onScroll() {
