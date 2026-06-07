@@ -402,17 +402,9 @@
       width: 100%; height: 100%;
       pointer-events: none;
       opacity: 0;
-      animation: hero3dIn 1.4s ease 0.2s forwards;
-      mask-image: radial-gradient(ellipse 62% 72% at 74% 50%, black 15%, transparent 72%);
-      -webkit-mask-image: radial-gradient(ellipse 62% 72% at 74% 50%, black 15%, transparent 72%);
+      animation: hero3dIn 1.2s ease 0.15s forwards;
     }
     @keyframes hero3dIn { from { opacity:0; } to { opacity:1; } }
-    @media (max-width: 900px) {
-      #hero3d {
-        mask-image: radial-gradient(ellipse 85% 55% at 50% 62%, black 10%, transparent 68%);
-        -webkit-mask-image: radial-gradient(ellipse 85% 55% at 50% 62%, black 10%, transparent 68%);
-      }
-    }
   </style>
 </head>
 <body>
@@ -820,108 +812,189 @@
 </footer>
 
 <script>
-  // ─── Hero 3D sphere ───
+  // ─── Balón de fútbol 3D (icosaedro truncado: 12 pentágonos + 20 hexágonos) ───
   (function () {
     var c = document.getElementById('hero3d');
+    if (!c) return;
     var ctx = c.getContext('2d');
-    var W, H, rad, cx, cy;
+    var W, H;
 
     function resize() {
       W = c.width  = c.offsetWidth;
       H = c.height = c.offsetHeight;
-      rad = Math.min(W, H) * 0.36;
-      cx  = W > 860 ? W * 0.73 : W * 0.5;
-      cy  = H * 0.5;
     }
     resize();
     window.addEventListener('resize', resize);
 
-    // Golden-ratio spiral distribution — most uniform sphere coverage
-    var N = window.innerWidth < 600 ? 90 : 165;
-    var golden = Math.PI * (3 - Math.sqrt(5));
-    var pts = [];
-    for (var i = 0; i < N; i++) {
-      var y  = 1 - (i / (N - 1)) * 2;
-      var r  = Math.sqrt(1 - y * y);
-      var th = golden * i;
-      pts.push({ x: Math.cos(th) * r, y: y, z: Math.sin(th) * r });
+    // ── Generar los 60 vértices del icosaedro truncado ──
+    // Coordenadas: permutaciones pares de (0,±1,±3φ), (±2,±(1+2φ),±φ), (±1,±(2+φ),±2φ)
+    var PHI = (1 + Math.sqrt(5)) / 2;
+    var raw = [];
+
+    function ep(a, b, c) {            // tres permutaciones pares (cíclicas)
+      raw.push([a,b,c], [c,a,b], [b,c,a]);
     }
 
-    var mx = 0, my = 0;
-    document.addEventListener('mousemove', function (e) {
-      mx = (e.clientX / window.innerWidth  - 0.5);
-      my = (e.clientY / window.innerHeight - 0.5);
+    var s1, s2, s3;
+    for (s1 of [1,-1]) for (s2 of [1,-1])
+      ep(0, s1, s2 * 3 * PHI);
+    for (s1 of [1,-1]) for (s2 of [1,-1]) for (s3 of [1,-1])
+      ep(s1 * 2, s2 * (1 + 2*PHI), s3 * PHI);
+    for (s1 of [1,-1]) for (s2 of [1,-1]) for (s3 of [1,-1])
+      ep(s1, s2 * (2 + PHI), s3 * 2 * PHI);
+
+    // Normalizar a esfera unitaria
+    var verts = raw.map(function (v) {
+      var len = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+      return [v[0]/len, v[1]/len, v[2]/len];
     });
 
-    var t = 0;
-    var FOV = 950;
+    // ── Construir las 90 aristas: pares de vértices a distancia mínima ──
+    function dSq(a, b) {
+      var dx=a[0]-b[0], dy=a[1]-b[1], dz=a[2]-b[2];
+      return dx*dx + dy*dy + dz*dz;
+    }
+    var minDsq = Infinity, i, j;
+    for (i = 0; i < raw.length; i++)
+      for (j = i+1; j < raw.length; j++) {
+        var d = dSq(raw[i], raw[j]);
+        if (d < minDsq) minDsq = d;
+      }
 
-    function frame() {
-      ctx.clearRect(0, 0, W, H);
-      t += 0.0038;
+    var edges = [], thresh = minDsq * 1.04;
+    for (i = 0; i < raw.length; i++)
+      for (j = i+1; j < raw.length; j++)
+        if (dSq(raw[i], raw[j]) <= thresh)
+          edges.push([i, j]);
 
-      var rotY = t  + mx * 0.45;
-      var rotX = my * 0.28 + 0.18;
-      var cosX = Math.cos(rotX), sinX = Math.sin(rotX);
-      var cosY = Math.cos(rotY), sinY = Math.sin(rotY);
-
-      // Project
-      var proj = pts.map(function (p) {
-        var x = p.x * rad, y = p.y * rad, z = p.z * rad;
-        var x2 =  x * cosY + z * sinY;
-        var z2 = -x * sinY + z * cosY;
-        var y2 =  y * cosX - z2 * sinX;
-        var z3 =  y * sinX + z2 * cosX;
-        var s  = FOV / (FOV + z3 + rad);
-        return { px: x2 * s + cx, py: y2 * s + cy, z: z3,
-                 depth: (z3 / rad + 1) * 0.5 };
-      });
-
-      // Lines between nearby points
-      var maxD = rad * 0.46;
-      var maxD2 = maxD * maxD;
-      ctx.lineWidth = 0.5;
-      for (var i = 0; i < proj.length; i++) {
-        for (var j = i + 1; j < proj.length; j++) {
-          var dx = proj[i].px - proj[j].px;
-          var dy = proj[i].py - proj[j].py;
-          var d2 = dx * dx + dy * dy;
-          if (d2 < maxD2) {
-            var fade    = 1 - Math.sqrt(d2) / maxD;
-            var avgD    = (proj[i].depth + proj[j].depth) * 0.5;
-            var alpha   = (fade * avgD * 0.20).toFixed(3);
-            ctx.strokeStyle = 'rgba(34,197,94,' + alpha + ')';
-            ctx.beginPath();
-            ctx.moveTo(proj[i].px, proj[i].py);
-            ctx.lineTo(proj[j].px, proj[j].py);
-            ctx.stroke();
+    // ── Identificar pentágonos (para resaltarlos distinto) ──
+    // Los 12 vértices del icosaedro original son los centros de los pentágonos.
+    // Una arista es de pentágono si sus dos extremos comparten el mismo pentágono.
+    // Construimos la adyacencia y buscamos ciclos de 5.
+    var adj = Array.from({length:60}, function(){ return []; });
+    edges.forEach(function(e) {
+      adj[e[0]].push(e[1]);
+      adj[e[1]].push(e[0]);
+    });
+    var pentEdgeSet = new Set();
+    // Un pentágono: 5 vértices donde cada par consecutivo es arista
+    for (i = 0; i < 60; i++) {
+      var nb = adj[i];
+      for (var a = 0; a < nb.length; a++) {
+        for (var b2 = a+1; b2 < nb.length; b2++) {
+          var na = adj[nb[a]], nb_ = adj[nb[b2]];
+          // ¿Tienen nb[a] y nb[b2] un vecino común distinto de i?
+          for (var k = 0; k < na.length; k++) {
+            if (na[k] === i) continue;
+            if (nb_.indexOf(na[k]) !== -1) {
+              // i, nb[a], na[k], nb[b2] forman un ciclo de 4 con un quinto
+              // Verificar ciclo de 5
+              var p = [i, nb[a], na[k], nb[b2]];
+              // Buscar quinto vértice adyacente a nb[a] y nb[b2] distinto de i y na[k]
+              for (var m = 0; m < na.length; m++) {
+                if (na[m] === i || na[m] === na[k]) continue;
+                if (nb_.indexOf(na[m]) !== -1) {
+                  // Ciclo 5: i - nb[a] - na[k] - ... no, este método no es correcto
+                  // Usar enfoque más simple
+                }
+              }
+            }
           }
         }
       }
+    }
+    // Método más simple: un pentágono es un ciclo de 5 donde cada vértice
+    // tiene exactamente 1 vecino en el ciclo que no es de hexágono.
+    // Para simplificar, identificamos aristas de pentágono como las que
+    // pertenecen a exactamente 1 cara de 5 lados.
+    // Usamos: en el icosaedro truncado, la arista de pentágono conecta vértices
+    // cuyo tercer vecino en común es también vecino entre sí (forman un triángulo
+    // en el grafo de adyacencia junto con el vértice original... no del todo).
+    //
+    // Enfoque definitivo: 2 vértices comparten una arista de PENTÁGONO si y solo
+    // si tienen exactamente 1 vecino en común. Arista de HEXÁGONO: 2 vecinos en común.
+    var pentEdges = new Set();
+    edges.forEach(function(e, idx) {
+      var na2 = adj[e[0]], nb2 = adj[e[1]];
+      var common = 0;
+      for (var x = 0; x < na2.length; x++)
+        if (nb2.indexOf(na2[x]) !== -1) common++;
+      if (common === 1) pentEdges.add(idx);   // arista de pentágono
+    });
 
-      // Sort back→front
-      proj.sort(function (a, b) { return a.z - b.z; });
+    // ── Mouse parallax ──
+    var mx = 0, my = 0;
+    document.addEventListener('mousemove', function (e) {
+      mx = e.clientX / window.innerWidth  - 0.5;
+      my = e.clientY / window.innerHeight - 0.5;
+    });
 
-      // Glow on front dots
-      proj.forEach(function (p) {
-        if (p.depth < 0.78) return;
-        var gr = rad * 0.065 * p.depth;
-        var grd = ctx.createRadialGradient(p.px, p.py, 0, p.px, p.py, gr);
-        grd.addColorStop(0, 'rgba(34,197,94,' + (p.depth * 0.22).toFixed(3) + ')');
-        grd.addColorStop(1, 'rgba(34,197,94,0)');
-        ctx.beginPath();
-        ctx.arc(p.px, p.py, gr, 0, Math.PI * 2);
-        ctx.fillStyle = grd;
-        ctx.fill();
+    var t = 0;
+    var FOV = 1200;
+
+    function frame() {
+      ctx.clearRect(0, 0, W, H);
+      t += 0.004;
+
+      var rotY = t + mx * 0.4;
+      var rotX = my * 0.25 + 0.18;
+      var cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+      var cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+
+      var R   = Math.min(W, H) * (W > 860 ? 0.28 : 0.22);
+      var pcx = W > 860 ? W * 0.71 : W * 0.5;
+      var pcy = H * 0.5;
+
+      // Halo detrás del balón
+      var grd = ctx.createRadialGradient(pcx, pcy, 0, pcx, pcy, R * 1.35);
+      grd.addColorStop(0,   'rgba(34,197,94,0.055)');
+      grd.addColorStop(0.5, 'rgba(34,197,94,0.018)');
+      grd.addColorStop(1,   'rgba(34,197,94,0)');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(pcx, pcy, R * 1.35, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Proyectar vértices
+      var proj = verts.map(function (v) {
+        var x = v[0]*R, y = v[1]*R, z = v[2]*R;
+        var x2 =  x*cosY + z*sinY;
+        var z2 = -x*sinY + z*cosY;
+        var y2 =  y*cosX - z2*sinX;
+        var z3 =  y*sinX + z2*cosX;
+        var s  = FOV / (FOV + z3 + R);
+        return { sx: x2*s + pcx, sy: y2*s + pcy, z: z3,
+                 d: (z3 / R + 1) * 0.5 };
       });
 
-      // Dots
-      proj.forEach(function (p) {
-        var size  = (p.depth * 0.55 + 0.45) * 1.9;
-        var alpha = (p.depth * 0.72 + 0.07).toFixed(3);
+      // Dibujar aristas
+      ctx.lineCap = 'round';
+      edges.forEach(function (e, idx) {
+        var a = proj[e[0]], b = proj[e[1]];
+        var depth = (a.d + b.d) * 0.5;
+        var isPent = pentEdges.has(idx);
+        // Las aristas del pentágono son más brillantes y gruesas → el patrón del balón es visible
+        var alpha = isPent
+          ? depth * depth * 0.85 + 0.06
+          : depth * depth * 0.55 + 0.03;
+        var lw = isPent
+          ? depth * 1.8 + 0.5
+          : depth * 1.1 + 0.25;
+        ctx.strokeStyle = 'rgba(34,197,94,' + alpha.toFixed(3) + ')';
+        ctx.lineWidth   = lw;
         ctx.beginPath();
-        ctx.arc(p.px, p.py, size, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(34,197,94,' + alpha + ')';
+        ctx.moveTo(a.sx, a.sy);
+        ctx.lineTo(b.sx, b.sy);
+        ctx.stroke();
+      });
+
+      // Vértices como puntos pequeños
+      var sorted = proj.slice().sort(function (a, b) { return a.z - b.z; });
+      sorted.forEach(function (p) {
+        var alpha = p.d * p.d * 0.85 + 0.05;
+        ctx.fillStyle = 'rgba(34,197,94,' + alpha.toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.arc(p.sx, p.sy, p.d * 2.5 + 0.4, 0, Math.PI * 2);
         ctx.fill();
       });
 
