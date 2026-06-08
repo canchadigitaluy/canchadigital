@@ -407,6 +407,34 @@
     /* Labels: letter-spacing se expande al aparecer */
     .label.fade:not(.visible) { letter-spacing: 0.04em; }
 
+    /* ─── COMPARACIÓN ─── */
+    #comparacion { padding: 100px 6%; }
+    .comp-wrap { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin-top: 56px; }
+    .comp-col { background: var(--bg); display: flex; flex-direction: column; }
+    .comp-col--us { background: rgba(34,197,94,0.03); border-left: 1px solid var(--green-line); border-right: 1px solid var(--green-line); position: relative; margin: -1px; z-index: 1; }
+    .comp-col--us::before { content: 'Recomendado'; position: absolute; top: -1px; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; font-size: 0.6rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 12px; white-space: nowrap; }
+    .comp-head { padding: 32px 28px 22px; font-size: 0.88rem; font-weight: 500; border-bottom: 1px solid var(--rule); }
+    .comp-col--us .comp-head { color: var(--text); }
+    .comp-col:not(.comp-col--us) .comp-head { color: var(--muted); }
+    .comp-row { padding: 15px 28px; border-bottom: 1px solid var(--rule); display: flex; flex-direction: column; gap: 4px; }
+    .comp-row:last-child { border-bottom: none; padding-bottom: 28px; }
+    .comp-lbl { font-size: 0.66rem; color: var(--muted); letter-spacing: 0.04em; }
+    .comp-val { font-size: 0.83rem; color: var(--muted); }
+    .comp-col--us .comp-val { color: var(--muted-2); }
+    .comp-val.yes { color: var(--green); }
+    .comp-val.no { opacity: 0.4; }
+    @media (max-width: 700px) { .comp-wrap { grid-template-columns: 1fr; } .comp-col--us::before { display: none; } }
+
+    /* ─── CLUB ACTIVO ─── */
+    #activo { padding: 0 6% 100px; }
+    .activo-inner { display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 28px 36px; border: 1px solid var(--green-line); background: var(--green-dim); flex-wrap: wrap; }
+    .activo-left { display: flex; align-items: center; gap: 16px; }
+    .activo-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; animation: activoPulse 2.4s ease-in-out infinite; }
+    @keyframes activoPulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(34,197,94,.4)} 60%{opacity:.7;box-shadow:0 0 0 7px rgba(34,197,94,0)} }
+    .activo-txt strong { display: block; font-size: 0.88rem; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+    .activo-txt span { font-size: 0.78rem; color: var(--muted); line-height: 1.55; }
+    @media (max-width: 640px) { .activo-inner { flex-direction: column; align-items: flex-start; } }
+
     /* ─── HR DRAW (izquierda → derecha al hacer scroll) ─── */
     hr.rule {
       transform-origin: left; transform: scaleX(0);
@@ -554,6 +582,47 @@
 
 <hr class="rule" />
 
+<!-- ─── COMPARACIÓN ─── -->
+<section id="comparacion">
+  <div class="wrap">
+    <div class="fade">
+      <div class="label">Por qué Cancha Digital</div>
+      <h2 class="display" style="font-size:clamp(2rem,4vw,3rem)">Tres opciones.<br><em>Una obvia.</em></h2>
+    </div>
+    <div class="comp-wrap fade d1">
+      <div class="comp-col">
+        <div class="comp-head">Hacerlo solo</div>
+        <div class="comp-row"><span class="comp-lbl">Costo mensual</span><span class="comp-val no">Tu tiempo libre</span></div>
+        <div class="comp-row"><span class="comp-lbl">Estar online en</span><span class="comp-val no">Semanas (o nunca)</span></div>
+        <div class="comp-row"><span class="comp-lbl">Datos actualizados</span><span class="comp-val no">Vos, cada fecha</span></div>
+        <div class="comp-row"><span class="comp-lbl">Integración con la liga</span><span class="comp-val no">No existe</span></div>
+        <div class="comp-row"><span class="comp-lbl">Diseño profesional</span><span class="comp-val no">Depende</span></div>
+        <div class="comp-row"><span class="comp-lbl">Sin contrato</span><span class="comp-val no">—</span></div>
+      </div>
+      <div class="comp-col comp-col--us">
+        <div class="comp-head">Cancha Digital</div>
+        <div class="comp-row"><span class="comp-lbl">Costo mensual</span><span class="comp-val yes">$1.500 UYU</span></div>
+        <div class="comp-row"><span class="comp-lbl">Estar online en</span><span class="comp-val yes">Menos de 7 días</span></div>
+        <div class="comp-row"><span class="comp-lbl">Datos actualizados</span><span class="comp-val yes">Nosotros, siempre</span></div>
+        <div class="comp-row"><span class="comp-lbl">Integración con la liga</span><span class="comp-val yes">Incluida</span></div>
+        <div class="comp-row"><span class="comp-lbl">Diseño profesional</span><span class="comp-val yes">Sí, a medida</span></div>
+        <div class="comp-row"><span class="comp-lbl">Sin contrato</span><span class="comp-val yes">Sí</span></div>
+      </div>
+      <div class="comp-col">
+        <div class="comp-head">Agencia web</div>
+        <div class="comp-row"><span class="comp-lbl">Costo mensual</span><span class="comp-val no">$3.000+ UYU</span></div>
+        <div class="comp-row"><span class="comp-lbl">Estar online en</span><span class="comp-val no">Semanas</span></div>
+        <div class="comp-row"><span class="comp-lbl">Datos actualizados</span><span class="comp-val no">Costo extra</span></div>
+        <div class="comp-row"><span class="comp-lbl">Integración con la liga</span><span class="comp-val no">No existe</span></div>
+        <div class="comp-row"><span class="comp-lbl">Diseño profesional</span><span class="comp-val">Sí</span></div>
+        <div class="comp-row"><span class="comp-lbl">Sin contrato</span><span class="comp-val no">Generalmente no</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule" />
+
 <!-- ─── COMO FUNCIONA ─── -->
 <section id="como">
   <div class="wrap">
@@ -692,6 +761,24 @@
     </div>
     <p style="margin-top:16px;font-size:0.76rem;color:var(--muted);text-align:center">Sin contratos · Sin permanencia mínima · Cancelás cuando querés</p>
     <p style="margin-top:10px;font-size:0.72rem;color:var(--green);opacity:0.75;text-align:center;letter-spacing:0.04em">Precio exclusivo para clubes de la Liga Universitaria</p>
+  </div>
+</section>
+
+<hr class="rule" />
+
+<!-- ─── CLUB ACTIVO ─── -->
+<section id="activo">
+  <div class="wrap">
+    <div class="activo-inner fade">
+      <div class="activo-left">
+        <div class="activo-pulse"></div>
+        <div class="activo-txt">
+          <strong>Hay un sitio activo en la Liga Universitaria ahora mismo.</strong>
+          <span>Escribinos por Instagram y te lo mostramos antes de que decidas cualquier cosa.</span>
+        </div>
+      </div>
+      <a href="https://ig.me/m/canchadigitaluy" target="_blank" class="btn btn-solid">Ver el demo →</a>
+    </div>
   </div>
 </section>
 
